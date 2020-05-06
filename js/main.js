@@ -96,4 +96,50 @@ window.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = '';
     }
 
+    // Send form
+
+    let message = {
+        loading: 'Loading..',
+        success: 'Thanks! We will contact you shortly!',
+        failure: 'Something is wrong..',
+    };
+
+    let form = document.querySelector('.main-form'),
+        input = form.querySelectorAll('input'),
+        statusMessage = document.createElement('div');
+
+    statusMessage.classList.add('status');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        form.appendChild(statusMessage);
+
+        let request = new XMLHttpRequest();
+        request.open('POST', 'server.php');
+        request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+
+        let formData = new FormData(form);
+        let obj = {};
+
+        formData.forEach( (value, key) => obj[key] = value );
+
+        let json = JSON.stringify(obj);
+
+        request.send(json);
+
+        request.addEventListener('readystatechange', function() {
+            if(request.readyState < 4) {
+                statusMessage.textContent = message.loading;
+
+            } else if(request.readyState === 4 && request.status == 200) {
+                statusMessage.textContent = message.success;
+            } else {
+                statusMessage.textContent = message.failure;
+            }
+        });
+
+        for(let i = 0; i < input.length; i++) {
+            input[i].value = '';
+        }
+    });
 });
